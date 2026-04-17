@@ -1,0 +1,9 @@
+numpy
+scipy
+matplotlib
+gymnasium
+mujoco
+imageio
+pyyaml
+stable-baselines3
+tensorboard

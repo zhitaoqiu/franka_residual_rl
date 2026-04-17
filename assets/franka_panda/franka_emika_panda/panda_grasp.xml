@@ -1,0 +1,17 @@
+<mujoco model="panda_grasp">
+    <include file="panda.xml"/>
+
+    <worldbody>
+        <geom name="table" type="box" size="0.4 0.4 0.02" pos="0.5 0 0.02" rgba="0.3 0.3 0.3 1"/>
+
+        <body name="box" pos="0.52 0.04 0.06">
+            <freejoint name="box_joint"/>
+            <geom name="box_geom" type="box" size="0.02 0.02 0.02"
+                  rgba="1 0.5 0 1"
+                  mass="0.1"
+                  friction="1 0.5 0.0001"
+                  condim="4"/>
+            <site name="box_site" pos="0 0 0" size="0.01" rgba="1 0 0 1"/>
+        </body>
+    </worldbody>
+</mujoco>
