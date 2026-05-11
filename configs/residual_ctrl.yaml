@@ -1,0 +1,21 @@
+# Residual controller configuration
+# The RL policy outputs a 1D residual (v_z) on top of the
+# resolved-rate IK controller which handles XY and orientation.
+
+controller:
+  # IK gains (task-space velocity = gain * error)
+  xy_gain: 10.0                # Lateral correction gain
+  z_gain: 14.0                 # Vertical correction gain
+  z_damping: 0.8               # Vertical velocity damping
+  orientation_gain: 4.5        # Rotation correction gain
+
+  # DLS (damped least squares)
+  dls_damping: 0.02
+
+  # Joint velocity limits
+  dq_max: 0.8                  # Max joint velocity per step (rad/s)
+  dq_step_clip: 0.6            # IK step size scaling
+
+  # Action limits
+  action_low: -1.0
+  action_high: 1.0

@@ -6,3 +6,4 @@ logs/
 results/
 *.pt
 *.zip
+MUJOCO_LOG.TXT

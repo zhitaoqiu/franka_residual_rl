@@ -1,0 +1,36 @@
+# Peg-in-hole environment configuration
+# Used by: envs/peg_in_hole_env.py
+
+env:
+  # Task geometry
+  safe_offset: 0.10            # Initial peg height above hole (m)
+  target_insertion_depth: 0.025  # How deep to insert (m)
+
+  # Control
+  control_decimation: 5        # Physics steps per action
+  max_vz: 0.03                 # Max vertical velocity command (m/s)
+  max_retract: 0.02            # Max retraction above start (m)
+  max_overshoot: 0.005         # Max overshoot below goal (m)
+  q_noise: 0.005               # Joint reset noise (rad)
+
+  # Force limits
+  soft_fz_limit: 25.0          # Soft vertical force limit (N)
+  hard_fz_limit: 90.0          # Hard vertical force limit (N)
+  soft_lateral_force_limit: 20.0
+  hard_lateral_force_limit: 70.0
+
+  # Reward weights
+  progress_weight: 80.0
+  time_penalty: 0.01
+  force_penalty_weight: 0.01
+  lateral_penalty_weight: 0.015
+  action_penalty_weight: 0.02
+  action_smooth_penalty_weight: 0.01
+  success_bonus: 25.0
+  failure_penalty: 20.0
+
+  # Termination
+  max_steps: 600
+  success_z_tol: 0.003         # Z-position tolerance for success (m) — relaxed from 0.0015
+  success_force_limit: 35.0
+  success_lateral_limit: 20.0

@@ -1,27 +1,23 @@
+"""Test the PegInHoleResidualEnv with a basic step loop."""
 import numpy as np
-from envs.peg_in_hole_env import PegInHoleEnv
+from envs.peg_in_hole_env import PegInHoleResidualEnv
 
-MODEL_PATH = "assets/franka_panda/franka_emika_panda/scene.xml"
+env = PegInHoleResidualEnv(render_mode=None)
 
-env = PegInHoleEnv(
-    model_path=MODEL_PATH,
-    ee_body_name="panda_hand",
-    target_pos=[0.50, 0.0, 0.20],
-    success_threshold=0.02,
-    max_steps=50,
-)
-
-obs = env.reset()
+obs, info = env.reset()
 print("reset ok")
-print("ee_pos:", obs["ee_pos"])
-print("target_pos:", obs["target_pos"])
-print("rel_pos:", obs["rel_pos"])
+print("target_xy:", info["target_xy"])
+print("goal_z:", info["goal_z"])
+print("obs:", obs)
 
 for i in range(10):
-    ctrl = np.zeros(env.nu)
-    obs, reward, terminated, truncated, info = env.step(ctrl, n_substeps=5)
-    print(f"step={i}, reward={reward:.4f}, dist={info['distance_to_target']:.4f}")
+    action = np.array([0.5], dtype=np.float32)
+    obs, reward, terminated, truncated, info = env.step(action)
+    print(f"step={i}, reward={reward:.4f}, z_tip={info['z_tip']:.4f}, "
+          f"depth_error={info['depth_error']:.4f}, fz={info['fz']:.1f}")
 
     if terminated or truncated:
-        print("episode end:", info)
+        print("episode end:", info["termination_reason"])
         break
+
+env.close()
