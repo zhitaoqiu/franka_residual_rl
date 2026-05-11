@@ -4,7 +4,7 @@
 
 ## 演示
 
-![Peg-in-Hole Demo](assets/peg_in_hole_demo.gif)
+<video src="assets/peg_in_hole_demo.mp4" controls autoplay loop muted width="480"></video>
 
 *SAC 训练 10000 步后，机械臂匀速插入销钉。step 523 成功，depth_error=2.9mm。*
 
