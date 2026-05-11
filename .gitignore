@@ -7,3 +7,5 @@ results/
 *.pt
 *.zip
 MUJOCO_LOG.TXT
+RL-peg-in-hole/
+mujoco_sim/

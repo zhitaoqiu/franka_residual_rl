@@ -213,4 +213,12 @@
     <child link="panda_link8"/>
     <axis xyz="0 0 0"/>
   </joint>
+  <link name="peg_tip_frame"/>
+
+  <joint name="peg_tip_joint" type="fixed">
+    <parent link="panda_link8"/>
+    <child link="peg_tip_frame"/>
+    <!-- xyz 先填 0 0 0，等 Pinocchio 加载后重新测量真实偏移 -->
+    <origin rpy="0 0 0" xyz="0 0 0.185"/>
+  </joint>
 </robot>

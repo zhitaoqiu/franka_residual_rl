@@ -1,47 +1,72 @@
+# filepath: scripts/test_resolved_rate_pinocchio.py
+import mujoco
+import mujoco.viewer
 import numpy as np
-from envs.mujoco_base import MujocoBase
+import time
+import os
+import sys
+import pinocchio as pin
+
+# 自动处理路径
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(script_dir)
+sys.path.append(project_root)
+
 from controllers.pinocchio_model import PinocchioModel
 from controllers.resolved_rate_ctrl import ResolvedRateController
 
-MUJOCO_MODEL_PATH = "assets/franka_panda/franka_emika_panda/scene.xml"
-URDF_PATH = "assets/franka_panda/robots/panda_arm.urdf"
+def main():
+    # 路径匹配你的项目结构
+    xml_path = os.path.join(project_root, "assets", "franka_panda", "franka_emika_panda", "scene.xml")
+    urdf_path = os.path.join(project_root, "assets", "franka_panda", "robots", "panda_arm.urdf")
+    
+    mj_model = mujoco.MjModel.from_xml_path(xml_path)
+    mj_data = mujoco.MjData(mj_model)
+    pin_model = PinocchioModel(urdf_path, ee_frame_name="panda_link8")
+    
+    # 初始化控制器：设置合适的增益
+    controller = ResolvedRateController(pin_model, damping=0.02, kp_pos=3.0, kp_ori=3.0)
 
-env = MujocoBase(MUJOCO_MODEL_PATH, ee_body_name="panda_hand")
-pin_model = PinocchioModel(URDF_PATH, ee_frame_name="panda_link8")
-controller = ResolvedRateController(kp=1.0, dq_limit=0.03)
+    # 设定目标：插孔上方 15cm，末端垂直向下
+    target_pos = np.array([0.5, 0.0, 0.35]) 
+    target_rot = pin.utils.rpyToMatrix(np.pi, 0, 0) # 绕 Y 轴转 180 度使其朝下
 
-target_pos = np.array([0.35, 0.0, 0.55], dtype=np.float64)
+    # 初始化机器人姿态 (常见的避开奇异点的初始姿态)
+    mj_data.qpos[:7] = [0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785]
+    mujoco.mj_forward(mj_model, mj_data)
 
-obs = env.reset()
-print("reset ok")
-print("initial mujoco ee_pos:", obs["ee_pos"])
-print("target_pos:", target_pos)
+    print(f">>> 启动实时伺服测试。目标位置: {target_pos}")
 
-for i in range(50):
-    q_current = obs["qpos"][:7].copy()
+    with mujoco.viewer.launch_passive(mj_model, mj_data) as viewer:
+        while viewer.is_running():
+            loop_start = time.time()
 
-    ee_pos_pin = pin_model.get_ee_position(q_current)
-    J = pin_model.get_frame_jacobian(q_current)
+            # 1. 获取当前状态
+            q = mj_data.qpos[:7].copy()
+            dq = mj_data.qvel[:7].copy()
 
-    q_target = controller.compute_q_target(
-        q_current=q_current,
-        ee_pos=ee_pos_pin,
-        target_pos=target_pos,
-        J_full=J,
-    )
+            # 2. 计算期望关节速度
+            joint_v_d, err = controller.compute_joint_velocity(q, dq, target_pos, target_rot)
 
-    ctrl = np.zeros(env.nu)
-    ctrl[:7] = q_target
-    if env.nu > 7:
-        ctrl[7] = 0.0
+            # 3. 运动学积分步进 (Kinematic Step)
+            dt = mj_model.opt.timestep
+            mj_data.qpos[:7] += joint_v_d * dt
+            mj_data.qvel[:7] = joint_v_d
 
-    env.step_sim(ctrl, n_substeps=5)
-    obs = env.get_obs()
+            # 4. 更新物理引擎并渲染
+            mujoco.mj_kinematics(mj_model, mj_data)
+            viewer.sync()
 
-    dist = np.linalg.norm(target_pos - ee_pos_pin)
+            # 打印收敛情况
+            dist = np.linalg.norm(err)
+            if dist < 0.001:
+                print("目标已精准送达！")
+                break
 
-    print(
-        f"step={i:02d}, "
-        f"pin_ee={ee_pos_pin}, "
-        f"dist={dist:.4f}"
-    )
+            # 严格控制循环频率
+            elapsed = time.time() - loop_start
+            if elapsed < dt:
+                time.sleep(dt - elapsed)
+
+if __name__ == "__main__":
+    main()
