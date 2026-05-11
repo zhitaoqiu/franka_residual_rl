@@ -2,6 +2,12 @@
 
 基于 MuJoCo 的 Franka Emika Panda 机械臂销孔装配（peg-in-hole）残差强化学习。
 
+## 演示
+
+![Peg-in-Hole Demo](assets/peg_in_hole_demo.gif)
+
+*SAC 训练 10000 步后，机械臂匀速插入销钉。step 523 成功，depth_error=2.9mm。*
+
 ## 概述
 
 RL 策略（SAC）输出 1D 残差速度指令（垂直方向），叠加在基于 Jacobian 的 resolved-rate IK 控制器之上。控制器负责 XY 对齐和姿态锁定，RL 只控制插入深度。
