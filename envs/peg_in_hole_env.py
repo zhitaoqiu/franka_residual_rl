@@ -58,8 +58,8 @@ class PegInHoleResidualEnv(gym.Env):
         self.peg_geom_id = mujoco.mj_name2id(
             self.mj_model, mujoco.mjtObj.mjOBJ_GEOM, "peg_geom"
         )
-        self.wall_front_geom_id = mujoco.mj_name2id(
-            self.mj_model, mujoco.mjtObj.mjOBJ_GEOM, "wall_front"
+        self.wall_geom_id = mujoco.mj_name2id(
+            self.mj_model, mujoco.mjtObj.mjOBJ_GEOM, "wall_0"
         )
 
         # ----- action / observation -----
@@ -92,7 +92,7 @@ class PegInHoleResidualEnv(gym.Env):
         self.max_overshoot = 0.005
 
         self.soft_fz_limit = 55.0
-        self.hard_fz_limit = 90.0
+        self.hard_fz_limit = 120.0
         self.soft_lateral_force_limit = 35.0
         self.hard_lateral_force_limit = 70.0
 
@@ -105,7 +105,7 @@ class PegInHoleResidualEnv(gym.Env):
         self.success_bonus = 25.0
         self.failure_penalty = 20.0
 
-        self.success_z_tol = 0.003  # relaxed from 0.0015 for early training
+        self.success_z_tol = 0.002  # tight tolerance for precision insertion
         self.success_force_limit = 35.0
         self.success_lateral_limit = 20.0
 
@@ -156,8 +156,8 @@ class PegInHoleResidualEnv(gym.Env):
     def _get_hole_top_z(self) -> float:
         # top = world z center + half height of wall geom
         return float(
-            self.mj_data.geom_xpos[self.wall_front_geom_id, 2]
-            + self.mj_model.geom_size[self.wall_front_geom_id, 2]
+            self.mj_data.geom_xpos[self.wall_geom_id, 2]
+            + self.mj_model.geom_size[self.wall_geom_id, 2]
         )
 
     def _get_peg_tip_pose(self) -> Tuple[np.ndarray, np.ndarray]:
