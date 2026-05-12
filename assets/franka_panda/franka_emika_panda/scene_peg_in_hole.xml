@@ -22,32 +22,80 @@
     <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
 
     <!-- Round hole: inner radius 11mm, peg radius 8mm => 3mm radial clearance.
-         12 tangential boxes form the cylindrical wall. -->
+         36 tangential boxes (every 10deg) form a smooth cylindrical wall. -->
     <body name="target_hole" pos="0.5 0 0">
       <geom name="hole_bottom" type="cylinder" size="0.014 0.005" pos="0 0 -0.005" rgba="0.2 0.8 0.2 1"/>
-      <geom name="wall_0" type="box" size="0.003 0.005 0.02" pos="0.014 0 0.02" euler="0 0 0"
+      <geom name="wall_0" type="box" size="0.003 0.0025 0.02" pos="0.014 0.0 0.02" euler="0 0 0"
         material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
-      <geom name="wall_1" type="box" size="0.003 0.005 0.02" pos="0.01212 0.007 0.02" euler="0 0 30"
+      <geom name="wall_1" type="box" size="0.003 0.0025 0.02" pos="0.01379 0.00243 0.02" euler="0 0 10"
         material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
-      <geom name="wall_2" type="box" size="0.003 0.005 0.02" pos="0.007 0.01212 0.02" euler="0 0 60"
+      <geom name="wall_2" type="box" size="0.003 0.0025 0.02" pos="0.01316 0.00479 0.02" euler="0 0 20"
         material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
-      <geom name="wall_3" type="box" size="0.003 0.005 0.02" pos="0 0.014 0.02" euler="0 0 90"
+      <geom name="wall_3" type="box" size="0.003 0.0025 0.02" pos="0.01212 0.007 0.02" euler="0 0 30"
         material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
-      <geom name="wall_4" type="box" size="0.003 0.005 0.02" pos="-0.007 0.01212 0.02" euler="0 0 120"
+      <geom name="wall_4" type="box" size="0.003 0.0025 0.02" pos="0.01072 0.009 0.02" euler="0 0 40"
         material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
-      <geom name="wall_5" type="box" size="0.003 0.005 0.02" pos="-0.01212 0.007 0.02" euler="0 0 150"
+      <geom name="wall_5" type="box" size="0.003 0.0025 0.02" pos="0.009 0.01072 0.02" euler="0 0 50"
         material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
-      <geom name="wall_6" type="box" size="0.003 0.005 0.02" pos="-0.014 0 0.02" euler="0 0 180"
+      <geom name="wall_6" type="box" size="0.003 0.0025 0.02" pos="0.007 0.01212 0.02" euler="0 0 60"
         material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
-      <geom name="wall_7" type="box" size="0.003 0.005 0.02" pos="-0.01212 -0.007 0.02" euler="0 0 210"
+      <geom name="wall_7" type="box" size="0.003 0.0025 0.02" pos="0.00479 0.01316 0.02" euler="0 0 70"
         material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
-      <geom name="wall_8" type="box" size="0.003 0.005 0.02" pos="-0.007 -0.01212 0.02" euler="0 0 240"
+      <geom name="wall_8" type="box" size="0.003 0.0025 0.02" pos="0.00243 0.01379 0.02" euler="0 0 80"
         material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
-      <geom name="wall_9" type="box" size="0.003 0.005 0.02" pos="0 -0.014 0.02" euler="0 0 270"
+      <geom name="wall_9" type="box" size="0.003 0.0025 0.02" pos="0.0 0.014 0.02" euler="0 0 90"
         material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
-      <geom name="wall_10" type="box" size="0.003 0.005 0.02" pos="0.007 -0.01212 0.02" euler="0 0 300"
+      <geom name="wall_10" type="box" size="0.003 0.0025 0.02" pos="-0.00243 0.01379 0.02" euler="0 0 100"
         material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
-      <geom name="wall_11" type="box" size="0.003 0.005 0.02" pos="0.01212 -0.007 0.02" euler="0 0 330"
+      <geom name="wall_11" type="box" size="0.003 0.0025 0.02" pos="-0.00479 0.01316 0.02" euler="0 0 110"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_12" type="box" size="0.003 0.0025 0.02" pos="-0.007 0.01212 0.02" euler="0 0 120"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_13" type="box" size="0.003 0.0025 0.02" pos="-0.009 0.01072 0.02" euler="0 0 130"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_14" type="box" size="0.003 0.0025 0.02" pos="-0.01072 0.009 0.02" euler="0 0 140"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_15" type="box" size="0.003 0.0025 0.02" pos="-0.01212 0.007 0.02" euler="0 0 150"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_16" type="box" size="0.003 0.0025 0.02" pos="-0.01316 0.00479 0.02" euler="0 0 160"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_17" type="box" size="0.003 0.0025 0.02" pos="-0.01379 0.00243 0.02" euler="0 0 170"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_18" type="box" size="0.003 0.0025 0.02" pos="-0.014 0.0 0.02" euler="0 0 180"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_19" type="box" size="0.003 0.0025 0.02" pos="-0.01379 -0.00243 0.02" euler="0 0 190"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_20" type="box" size="0.003 0.0025 0.02" pos="-0.01316 -0.00479 0.02" euler="0 0 200"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_21" type="box" size="0.003 0.0025 0.02" pos="-0.01212 -0.007 0.02" euler="0 0 210"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_22" type="box" size="0.003 0.0025 0.02" pos="-0.01072 -0.009 0.02" euler="0 0 220"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_23" type="box" size="0.003 0.0025 0.02" pos="-0.009 -0.01072 0.02" euler="0 0 230"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_24" type="box" size="0.003 0.0025 0.02" pos="-0.007 -0.01212 0.02" euler="0 0 240"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_25" type="box" size="0.003 0.0025 0.02" pos="-0.00479 -0.01316 0.02" euler="0 0 250"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_26" type="box" size="0.003 0.0025 0.02" pos="-0.00243 -0.01379 0.02" euler="0 0 260"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_27" type="box" size="0.003 0.0025 0.02" pos="-0.0 -0.014 0.02" euler="0 0 270"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_28" type="box" size="0.003 0.0025 0.02" pos="0.00243 -0.01379 0.02" euler="0 0 280"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_29" type="box" size="0.003 0.0025 0.02" pos="0.00479 -0.01316 0.02" euler="0 0 290"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_30" type="box" size="0.003 0.0025 0.02" pos="0.007 -0.01212 0.02" euler="0 0 300"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_31" type="box" size="0.003 0.0025 0.02" pos="0.009 -0.01072 0.02" euler="0 0 310"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_32" type="box" size="0.003 0.0025 0.02" pos="0.01072 -0.009 0.02" euler="0 0 320"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_33" type="box" size="0.003 0.0025 0.02" pos="0.01212 -0.007 0.02" euler="0 0 330"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_34" type="box" size="0.003 0.0025 0.02" pos="0.01316 -0.00479 0.02" euler="0 0 340"
+        material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
+      <geom name="wall_35" type="box" size="0.003 0.0025 0.02" pos="0.01379 -0.00243 0.02" euler="0 0 350"
         material="hole_wall" solimp="0.95 0.99 0.001" solref="0.008 1"/>
       <site name="hole_center" pos="0 0 0" size="0.005" rgba="1 0 0 0"/>
     </body>

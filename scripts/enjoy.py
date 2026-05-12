@@ -34,6 +34,7 @@ print(f"[Enjoy] model: {model_path}")
 print(f"[Enjoy] episodes: {N_EPISODES}")
 
 env = PegInHoleResidualEnv(render_mode="human")
+env.disable_randomization()
 model = SAC.load(model_path, env=env)
 
 with mujoco.viewer.launch_passive(env.unwrapped.mj_model, env.unwrapped.mj_data) as viewer:

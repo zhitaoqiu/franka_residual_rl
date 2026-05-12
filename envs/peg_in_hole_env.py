@@ -587,7 +587,7 @@ class PegInHoleResidualEnv(gym.Env):
             self._nominal_geom_friction[self.peg_geom_id] * factor
         )
 
-        for i in range(12):
+        for i in range(36):
             try:
                 wid = mujoco.mj_name2id(self.mj_model, mujoco.mjtObj.mjOBJ_GEOM, f"wall_{i}")
             except Exception:
