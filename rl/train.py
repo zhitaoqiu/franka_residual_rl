@@ -31,18 +31,20 @@ CONFIG = dict(
     gradient_steps=1,
     ent_coef="auto",
 
-    total_timesteps=100_000,
+    total_timesteps=200_000,
     log_dir="logs/sac_peg_in_hole",
     save_dir="results/sac_peg_in_hole",
-    save_freq=20_000,
-    eval_freq=10_000,
+    save_freq=40_000,
+    eval_freq=20_000,
     n_eval_episodes=10,
 )
 
 
-def make_env(rank: int = 0, seed: int = 42, render: bool = False):
+def make_env(rank: int = 0, seed: int = 42, render: bool = False, eval_mode: bool = False):
     def _init():
         env = PegInHoleResidualEnv(render_mode="human" if render else None)
+        if eval_mode:
+            env.disable_randomization()
         env.reset(seed=seed + rank)
         return env
     return _init
@@ -64,8 +66,8 @@ def main():
     train_env = DummyVecEnv([make_env(rank=i) for i in range(CONFIG["n_envs"])])
     train_env = VecMonitor(train_env, log_dir)
 
-    # Eval env (single, separate)
-    eval_env = DummyVecEnv([make_env(rank=999, seed=999)])
+    # Eval env (single, separate, deterministic for clean progress tracking)
+    eval_env = DummyVecEnv([make_env(rank=999, seed=999, eval_mode=True)])
     eval_env = VecMonitor(eval_env)
 
     print("[Train] initializing SAC...")

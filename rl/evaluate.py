@@ -19,6 +19,7 @@ from envs.peg_in_hole_env import PegInHoleResidualEnv
 def evaluate(model_path: str, n_episodes: int = 20, render: bool = False):
     render_mode = "human" if render else None
     env = PegInHoleResidualEnv(render_mode=render_mode)
+    env.disable_randomization()
 
     print(f"[评估] 加载模型: {model_path}")
     model = SAC.load(model_path, env=env, device="cuda")

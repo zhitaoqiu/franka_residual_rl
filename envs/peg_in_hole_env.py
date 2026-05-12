@@ -61,6 +61,18 @@ class PegInHoleResidualEnv(gym.Env):
         self.wall_geom_id = mujoco.mj_name2id(
             self.mj_model, mujoco.mjtObj.mjOBJ_GEOM, "wall_0"
         )
+        # Body IDs for dynamics randomization
+        self._arm_body_ids = [
+            mujoco.mj_name2id(self.mj_model, mujoco.mjtObj.mjOBJ_BODY, f"link{i}")
+            for i in range(8)
+        ]
+        self._hand_body_id = mujoco.mj_name2id(
+            self.mj_model, mujoco.mjtObj.mjOBJ_BODY, "hand"
+        )
+        # Store nominal dynamics for reset
+        self._nominal_dof_damping = self.mj_model.dof_damping.copy()
+        self._nominal_geom_friction = self.mj_model.geom_friction.copy()
+        self._nominal_body_mass = self.mj_model.body_mass.copy()
 
         # ----- action / observation -----
         # action = [v_z_cmd], positive value means move down.
@@ -84,6 +96,16 @@ class PegInHoleResidualEnv(gym.Env):
         self.max_steps = 600
         self.control_decimation = 5
         self.q_noise = 0.005
+
+        # ----- domain randomization -----
+        self.enable_obs_noise = False       # force noise hurts more than it helps for this task
+        self.obs_force_noise_std = 0.3       # N, Gaussian noise on fx/fy/fz
+        self.enable_dynamics_randomization = True
+        self.dyn_mass_range = (0.95, 1.05)   # body mass multiplier
+        self.dyn_damping_range = (0.9, 1.1)  # joint damping multiplier
+        self.dyn_friction_range = (0.7, 1.5) # geom friction multiplier
+        self.enable_init_xy_randomization = True
+        self.init_xy_range = 0.002           # ±2mm XY offset at reset
 
         self.safe_offset = 0.05
         self.target_insertion_depth = 0.025
@@ -262,11 +284,14 @@ class PegInHoleResidualEnv(gym.Env):
     # ------------------------------------------------------------------
     # Requested module 1: reset_to_aligned_pose()
     # ------------------------------------------------------------------
-    def reset_to_aligned_pose(self):
+    def reset_to_aligned_pose(self, xy_offset: np.ndarray | None = None):
         hole_center = self._get_hole_center_world()
         self.hole_top_z = self._get_hole_top_z()
 
         self.target_xy = hole_center[:2].copy()
+
+        if xy_offset is not None:
+            self.target_xy = self.target_xy + xy_offset
 
         desired_z = self.hole_top_z + self.safe_offset
         desired_pos = np.array(
@@ -335,13 +360,15 @@ class PegInHoleResidualEnv(gym.Env):
         wrench = self._get_wrench_world()
 
         z_error = tip_pos[2] - self.goal_z
-        fx, fy, fz = wrench[0], wrench[1], wrench[2]
+        fx, fy, fz = float(wrench[0]), float(wrench[1]), float(wrench[2])
+
+        # Observation noise on force channels (sim-to-real)
+        if self.enable_obs_noise:
+            fx += self.np_random.normal(0.0, self.obs_force_noise_std)
+            fy += self.np_random.normal(0.0, self.obs_force_noise_std)
+            fz += self.np_random.normal(0.0, self.obs_force_noise_std)
 
         # Fixed-scale normalization so all dims are roughly [-1, 1].
-        # z_error: [-0.02, 0.12]  →  / 0.1
-        # v_z:     [-0.5, 0.5]    →  / 0.5
-        # forces:  [0, 90] / [-70, 70]  →  / 45
-        # action:  already in [-1, 1]
         obs = np.array(
             [
                 z_error / 0.1,
@@ -529,12 +556,67 @@ class PegInHoleResidualEnv(gym.Env):
         )
 
     # ------------------------------------------------------------------
+    # Domain randomization helpers
+    # ------------------------------------------------------------------
+    def disable_randomization(self):
+        """Disable all domain randomization (for deterministic evaluation)."""
+        self.enable_obs_noise = False
+        self.enable_dynamics_randomization = False
+        self.enable_init_xy_randomization = False
+
+    def _randomize_dynamics(self):
+        """Randomize joint damping, body masses, and geom friction each episode."""
+        if not self.enable_dynamics_randomization:
+            return
+
+        rng = self.np_random
+
+        # Joint damping (DOFs 0-6 are arm joints)
+        for i in range(7):
+            factor = rng.uniform(*self.dyn_damping_range)
+            self.mj_model.dof_damping[i] = self._nominal_dof_damping[i] * factor
+
+        # Body mass (arm links + hand)
+        for bid in self._arm_body_ids + [self._hand_body_id]:
+            factor = rng.uniform(*self.dyn_mass_range)
+            self.mj_model.body_mass[bid] = self._nominal_body_mass[bid] * factor
+
+        # Geom friction (peg + all wall geoms)
+        factor = rng.uniform(*self.dyn_friction_range)
+        self.mj_model.geom_friction[self.peg_geom_id] = (
+            self._nominal_geom_friction[self.peg_geom_id] * factor
+        )
+
+        for i in range(12):
+            try:
+                wid = mujoco.mj_name2id(self.mj_model, mujoco.mjtObj.mjOBJ_GEOM, f"wall_{i}")
+            except Exception:
+                continue
+            factor = rng.uniform(*self.dyn_friction_range)
+            self.mj_model.geom_friction[wid] = self._nominal_geom_friction[wid] * factor
+
+    def _randomize_initial_xy(self) -> np.ndarray:
+        """Return random XY offset for peg initial position."""
+        if not self.enable_init_xy_randomization:
+            return np.zeros(2, dtype=np.float64)
+        return self.np_random.uniform(
+            -self.init_xy_range, self.init_xy_range, size=2
+        ).astype(np.float64)
+
+    # ------------------------------------------------------------------
     # Gym API
     # ------------------------------------------------------------------
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
 
         mujoco.mj_resetData(self.mj_model, self.mj_data)
+
+        # Restore nominal dynamics before re-randomizing
+        self.mj_model.dof_damping[:] = self._nominal_dof_damping
+        self.mj_model.body_mass[:] = self._nominal_body_mass
+        self.mj_model.geom_friction[:] = self._nominal_geom_friction
+        self._randomize_dynamics()
+        self._xy_offset = self._randomize_initial_xy()
 
         self.step_count = 0
         self.last_action = 0.0
@@ -567,8 +649,8 @@ class PegInHoleResidualEnv(gym.Env):
         _, tip_rot0 = self._get_peg_tip_pose()
         self.desired_tip_rot = self._make_vertical_down_rot(tip_rot0)
 
-        # Align exactly above hole center using local Jacobian IK in MuJoCo.
-        self.reset_to_aligned_pose()
+        # Align above hole center (with optional XY randomization) using Jacobian IK.
+        self.reset_to_aligned_pose(xy_offset=self._xy_offset)
 
         # Ensure reset servo target and actual q are synchronized.
         self.joint_target_q = self.mj_data.qpos[:7].copy()
@@ -600,6 +682,9 @@ class PegInHoleResidualEnv(gym.Env):
             "goal_z": float(self.goal_z),
             "hole_top_z": float(self.hole_top_z),
             "termination_reason": self.termination_reason,
+            "xy_offset": self._xy_offset.copy(),
+            "obs_noise": self.enable_obs_noise,
+            "dyn_randomized": self.enable_dynamics_randomization,
         }
 
         return obs, info
