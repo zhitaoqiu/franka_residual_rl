@@ -2,11 +2,13 @@
 
 基于 MuJoCo 的 Franka Emika Panda 机械臂销孔装配（peg-in-hole）残差强化学习。
 
-## 演示
+<p align="center">
+  <video src="assets/peg_in_hole_demo.mp4" controls muted loop width="600">
+    你的浏览器不支持视频播放，请点击 <a href="assets/peg_in_hole_demo.mp4">这里</a> 下载观看。
+  </video>
+</p>
 
-<video src="assets/peg_in_hole_demo.mp4" controls autoplay loop muted width="480"></video>
-
-*SAC 训练 10000 步后，机械臂匀速插入销钉。step 523 成功，depth_error=2.9mm。*
+<p align="center"><em>SAC 训练后，机械臂匀速插入销钉。</em></p>
 
 ## 概述
 

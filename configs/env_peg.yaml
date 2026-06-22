@@ -1,36 +1,37 @@
-# Peg-in-hole environment configuration
-# Used by: envs/peg_in_hole_env.py
+# Peg-in-hole 环境配置
+# 使用者: envs/peg_in_hole_env.py
+# 注意: 此文件目前是参数参考，代码中仍硬编码了这些值，尚未实现 YAML 加载
 
 env:
-  # Task geometry
-  safe_offset: 0.10            # Initial peg height above hole (m)
-  target_insertion_depth: 0.025  # How deep to insert (m)
+  # —— 任务几何 ——
+  safe_offset: 0.10            # 复位时 peg 在孔上方的安全高度 (米)
+  target_insertion_depth: 0.025  # 目标插入深度 (米)
 
-  # Control
-  control_decimation: 5        # Physics steps per action
-  max_vz: 0.03                 # Max vertical velocity command (m/s)
-  max_retract: 0.02            # Max retraction above start (m)
-  max_overshoot: 0.005         # Max overshoot below goal (m)
-  q_noise: 0.005               # Joint reset noise (rad)
+  # —— 控制参数 ——
+  control_decimation: 5        # 每个 RL 动作对应的物理步数
+  max_vz: 0.03                 # 最大垂直速度指令 (米/秒)
+  max_retract: 0.02            # 允许拔出的最大高度，超过起始位置算终止 (米)
+  max_overshoot: 0.005         # 允许超过目标深度的最大量 (米)
+  q_noise: 0.005               # 复位时关节位置的随机噪声 (弧度)
 
-  # Force limits
-  soft_fz_limit: 25.0          # Soft vertical force limit (N)
-  hard_fz_limit: 90.0          # Hard vertical force limit (N)
-  soft_lateral_force_limit: 20.0
-  hard_lateral_force_limit: 70.0
+  # —— 力阈值 ——
+  soft_fz_limit: 25.0          # Z 轴力软限制 (N) — 超过此值开始扣奖励分
+  hard_fz_limit: 90.0          # Z 轴力硬限制 (N) — 超过此值直接终止本集
+  soft_lateral_force_limit: 20.0  # 侧向力软限制 (N)
+  hard_lateral_force_limit: 70.0  # 侧向力硬限制 (N)
 
-  # Reward weights
-  progress_weight: 80.0
-  time_penalty: 0.01
-  force_penalty_weight: 0.01
-  lateral_penalty_weight: 0.015
-  action_penalty_weight: 0.02
-  action_smooth_penalty_weight: 0.01
-  success_bonus: 25.0
-  failure_penalty: 20.0
+  # —— 奖励权重 ——
+  progress_weight: 80.0        # 插入进度奖励（主力驱动信号）
+  time_penalty: 0.01           # 每步时间惩罚
+  force_penalty_weight: 0.01   # Z 轴力惩罚权重（超过 soft 阈值才扣）
+  lateral_penalty_weight: 0.015  # 侧向力惩罚权重
+  action_penalty_weight: 0.02 # 动作幅度惩罚（鼓励小动作）
+  action_smooth_penalty_weight: 0.01  # 动作平滑惩罚（防止 jitter）
+  success_bonus: 25.0          # 成功时一次性奖励
+  failure_penalty: 20.0        # 失败时一次性惩罚
 
-  # Termination
-  max_steps: 600
-  success_z_tol: 0.003         # Z-position tolerance for success (m) — relaxed from 0.0015
-  success_force_limit: 35.0
-  success_lateral_limit: 20.0
+  # —— 终止条件 ——
+  max_steps: 600               # 最大步数（超时截断，不算失败）
+  success_z_tol: 0.003         # 判定成功的 Z 位置容差 (米)，已从 0.0015 放宽
+  success_force_limit: 35.0    # 成功判定时的力上限 (N)
+  success_lateral_limit: 20.0  # 成功判定时的侧向力上限 (N)

@@ -1,21 +1,22 @@
-# Residual controller configuration
-# The RL policy outputs a 1D residual (v_z) on top of the
-# resolved-rate IK controller which handles XY and orientation.
+# 残差控制器配置
+# RL 策略在 resolved-rate IK 控制器之上输出 1D 残差 (v_z)
+# IK 控制器负责 XY 对齐和姿态锁定，RL 只接管 Z 轴插入
+# 使用者: envs/peg_in_hole_env.py apply_action() 方法
 
 controller:
-  # IK gains (task-space velocity = gain * error)
-  xy_gain: 10.0                # Lateral correction gain
-  z_gain: 14.0                 # Vertical correction gain
-  z_damping: 0.8               # Vertical velocity damping
-  orientation_gain: 4.5        # Rotation correction gain
+  # —— IK 增益（任务空间速度 = 增益 × 误差） ——
+  xy_gain: 10.0                # XY 横向对齐增益（越大越快，但可能超调）
+  z_gain: 14.0                 # Z 方向跟踪增益
+  z_damping: 0.8               # Z 方向速度阻尼（减小过冲）
+  orientation_gain: 4.5        # 姿态修正增益（锁定垂直向下）
 
-  # DLS (damped least squares)
-  dls_damping: 0.02
+  # —— DLS（阻尼最小二乘） ——
+  dls_damping: 0.02            # Jacobian 伪逆的阻尼项，防止接近奇异构型时速度爆炸
 
-  # Joint velocity limits
-  dq_max: 0.8                  # Max joint velocity per step (rad/s)
-  dq_step_clip: 0.6            # IK step size scaling
+  # —— 关节速度限制 ——
+  dq_max: 0.8                  # 每步最大关节速度 (rad/s)
+  dq_step_clip: 0.6            # IK 迭代步长缩放系数
 
-  # Action limits
-  action_low: -1.0
-  action_high: 1.0
+  # —— 动作范围 ——
+  action_low: -1.0             # 动作下界（-1 = 全速拔出）
+  action_high: 1.0             # 动作上界（+1 = 全速插入）

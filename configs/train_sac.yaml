@@ -1,33 +1,35 @@
-# SAC training configuration
-# Used by: rl/train.py
+# SAC 训练配置
+# 使用者: rl/train.py
+# 注意: 此文件目前是参数参考，代码 train.py 中仍硬编码了这些值
 
 training:
-  n_envs: 8                    # Parallel environments
-  max_episode_steps: 300
+  # —— 环境 ——
+  n_envs: 8                    # 并行环境数
+  max_episode_steps: 300       # 每集最大步数
 
-  # SAC hyperparams
-  learning_rate: 3.0e-4
-  buffer_size: 500000
-  learning_starts: 10000
-  batch_size: 512
-  tau: 0.005
-  gamma: 0.99
-  train_freq: 1
-  gradient_steps: 1
-  ent_coef: auto
+  # —— SAC 超参数 ——
+  learning_rate: 3.0e-4        # 学习率
+  buffer_size: 500000          # 经验回放缓冲区大小
+  learning_starts: 10000       # 先收集 10000 步再开始训练（预热期）
+  batch_size: 512              # 每次梯度更新采样的批量大小
+  tau: 0.005                   # 目标网络软更新系数（越小越稳定，越大越激进）
+  gamma: 0.99                  # 折扣因子（接近 1 表示重视长期回报）
+  train_freq: 1                # 每收集几步训练一次
+  gradient_steps: 1            # 每次训练执行几步梯度更新
+  ent_coef: auto               # 熵温度系数（auto = 自动调节探索程度）
 
-  # Scale
-  total_timesteps: 2000000
+  # —— 训练规模 ——
+  total_timesteps: 2000000     # 总训练步数
 
-  # Logging
-  log_dir: "logs/sac_peg_in_hole"
-  save_dir: "results/sac_peg_in_hole"
-  save_freq: 50000
-  eval_freq: 20000
-  n_eval_episodes: 10
+  # —— 日志与保存 ——
+  log_dir: "logs/sac_peg_in_hole"         # TensorBoard 日志目录
+  save_dir: "results/sac_peg_in_hole"     # 模型保存目录
+  save_freq: 50000             # 每隔多少步保存一次检查点
+  eval_freq: 20000             # 每隔多少步评估一次
+  n_eval_episodes: 10          # 每次评估跑的集数
 
-  # Network
-  features_dim: 128
+  # —— 网络结构 ——
+  features_dim: 128            # 特征提取器输出维度
   net_arch:
-    pi: [256, 256]
-    qf: [256, 256]
+    pi: [256, 256]             # Actor（策略网络）隐藏层：两层各 256 个神经元
+    qf: [256, 256]             # Critic（Q 网络）隐藏层：两层各 256 个神经元
